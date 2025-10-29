@@ -3,7 +3,7 @@ import random
 
 # Load a readable font if available
 try:
-    font = PixelFont.load("/system/assets/fonts/bacteria.ppf")
+    font = PixelFont.load("/system/assets/fonts/nope.ppf")
 except Exception:
     font = None
 
@@ -33,9 +33,10 @@ def draw_text_center(text, y, brush=FG):
 
 
 def draw_question_mark():
-    # simple ASCII-like '?' on left half
+    # Draw a question mark as a fixed-grid text to ensure proper alignment.
     screen.brush = FG
-    lines = [
+    # Use a small monospace-like rendering: 7 columns x 7 rows
+    pattern = [
         "  ###  ",
         " #   # ",
         "     # ",
@@ -44,10 +45,27 @@ def draw_question_mark():
         "       ",
         "   #   ",
     ]
-    x0 = 10
-    y0 = 20
-    for i, line in enumerate(lines):
-        screen.text(line, x0, y0 + i * 10)
+
+    x0 = 8
+    y0 = 18
+
+    # If a pixel font is loaded and provides consistent character width, use
+    # that to space characters. Otherwise fall back to a fixed column width.
+    if font:
+        char_w, char_h = screen.measure_text("M")
+        col_w = int(char_w)
+        row_h = int(char_h + 2)
+    else:
+        col_w = 8
+        row_h = 10
+
+    for row_idx, row in enumerate(pattern):
+        y = y0 + row_idx * row_h
+        # draw each character in the row so spacing is precise
+        for col_idx, ch in enumerate(row):
+            if ch != " ":
+                x = x0 + col_idx * col_w
+                screen.text(ch, x, y)
 
 
 def draw_move_big(move, x):
